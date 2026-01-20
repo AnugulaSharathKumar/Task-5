@@ -1,3 +1,15 @@
+resource "google_compute_network" "vpc" {
+  name                    = "terraform-vpc"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "terraform-subnet"
+  ip_cidr_range = "10.10.0.0/24"
+  region        = var.region
+  network       = google_compute_network.vpc.id
+}
+
 resource "google_compute_instance" "ubuntu_vm" {
   name         = var.vm_name
   machine_type = var.machine_type
@@ -7,25 +19,17 @@ resource "google_compute_instance" "ubuntu_vm" {
     initialize_params {
       image = var.image
       size  = 20
-      type  = "pd-balanced"
     }
   }
 
   network_interface {
-    network = "default"
+    network    = google_compute_network.vpc.id
+    subnetwork = google_compute_subnetwork.subnet.id
 
     access_config {
-      # Enables external IP
+      # External IP
     }
   }
 
   tags = ["ubuntu", "terraform"]
-
-  metadata = {
-    enable-oslogin = "TRUE"
-  }
-
-  labels = {
-    env = "dev"
-  }
 }
