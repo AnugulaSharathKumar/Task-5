@@ -12,5 +12,5 @@ terraform {
 provider "google" {
   project = var.project
   region  = var.region
-  zone    = var.zone
+  # Remove zone, since multi-zone MIG does not require it here
 }
